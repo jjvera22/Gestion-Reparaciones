@@ -10,7 +10,7 @@
 <body style="background-color:rgb(108, 158, 112);">
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="card p-4 shadow-sm" style="width: 100%; max-width: 400px;">
-            <h3 class="text-center mb-4">Sistema de Gestión de taller de Reparaciones</h3>
+            <h3 class="text-center mb-4">Sistema de Gestión de taller de Reparaciones a</h3>
             <h3 class="text-center mb-4">Iniciar Sesión</h3>
             <form id="login-form">
                 <div class="mb-3">
