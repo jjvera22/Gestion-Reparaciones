@@ -1,5 +1,3 @@
-console.log('hola mundo');
-
 $('#login-form').on('submit', function(event) {
     event.preventDefault();
 

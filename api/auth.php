@@ -105,7 +105,14 @@ switch ($_POST['action']) {
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Perfil no encontrado']);
         }
+        break;
 
+    case 'logout':
+        session_start();
+        session_destroy();
+        echo json_encode(['status' => 'success', 'redirect' => '/GestionTaller/index.php']);
+        break;
+        
     default:
         # code...
         break;
