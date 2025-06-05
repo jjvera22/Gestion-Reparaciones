@@ -151,63 +151,74 @@ $count = 0;
 
 <!-- Modal Crear Diagnóstico -->
 <div class="modal fade" id="createDiagnosticModal" tabindex="-1" aria-labelledby="createDiagnosticModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      
-      <div class="modal-header">
-        <h5 class="modal-title" id="createDiagnosticModalLabel">Finalizar Solicitud - Crear Diagnóstico</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      
-      <div class="modal-body">
-        <form id="diagnosticForm">
-          
-          <input type="hidden" name="repair_request_id" id="diagnostic_repair_request_id">
-          <input type="hidden" name="action" id="diagnostic_action" value="finish_repair_request">
-          
-          <div class="mb-3">
-            <label for="diagnosis" class="form-label">Diagnóstico</label>
-            <textarea class="form-control" id="diagnosis_form" name="diagnosis" rows="3" required></textarea>
-          </div>
-          
-          <div class="mb-3">
-            <label for="diagnosed_by" class="form-label">Diagnosticado por</label>
-            <select class="form-select" id="diagnosed_by_select" name="diagnosed_by" required>
-                <option value="" disabled selected>Seleccione un técnico</option>
-                <?php
-                $stmt = $conexion->prepare("SELECT u.id, u.name FROM users u JOIN user_profiles up ON up.user_id = u.id JOIN profiles p ON p.id = up.profile_id WHERE p.name = 'admin'");
-                $stmt->execute();
-                $technicians = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                
-                foreach ($technicians as $technician) {
-                    echo '<option value="' . $technician['id'] . '">' . $technician['name'] . '</option>';
-                }
-                ?>
-            </select>
-          </div>
-          
-          <div class="mb-3">
-            <label for="diagnosis_date" class="form-label">Fecha de diagnóstico</label>
-            <input type="date" class="form-control" id="diagnosis_date_form" name="diagnosis_date" required>
-          </div>
-          
-          <div class="mb-3">
-            <label for="solution_description" class="form-label">Descripción de la solución</label>
-            <textarea class="form-control" id="solution_description_form" name="solution_description" rows="3" required></textarea>
-          </div>
-        
-        </form>
-      </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" form="diagnosticForm" class="btn btn-primary">Guardar diagnóstico</button>
-      </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDiagnosticModalLabel">Finalizar Solicitud - Crear Diagnóstico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="diagnosticForm">
+
+                    <input type="hidden" name="repair_request_id" id="diagnostic_repair_request_id">
+                    <input type="hidden" name="action" id="diagnostic_form_action" value="finish_repair_request">
+
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">Diagnóstico</label>
+                        <textarea class="form-control" id="diagnosis_form" name="diagnosis" rows="3" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="diagnosis_date" class="form-label">Fecha de diagnóstico</label>
+                        <input type="date" class="form-control" id="diagnosis_date_form" name="diagnosis_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="solution_description" class="form-label">Descripción de la solución</label>
+                        <textarea class="form-control" id="solution_description_form" name="solution_description" rows="3" required></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="diagnosticForm" class="btn btn-primary">Guardar diagnóstico</button>
+            </div>
+
+        </div>
     </div>
-  </div>
 </div>
 
+<!-- Modal Confirmar Avance de Estado -->
+<div class="modal fade" id="confirmAdvanceModal" tabindex="-1" aria-labelledby="confirmAdvanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmAdvanceModalLabel">Confirmar acción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="advanceStateForm">
+
+                    <input type="hidden" name="repair_request_id" id="advance_repair_request_id">
+
+                    <p>¿Está seguro de que desea avanzar esta solicitud al siguiente estado?</p>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="advanceStateForm" class="btn btn-success">Sí, avanzar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <script src="../../public/js/repair_request.js"></script>
 

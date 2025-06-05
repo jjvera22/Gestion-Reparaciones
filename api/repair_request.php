@@ -36,6 +36,78 @@ switch ($_POST['action']) {
 
         break;
 
+    case 'finish_repair_request':
+        session_start();
+        $repairRequestId = $_POST['repair_request_id'];
+        $diagnosis = $_POST['diagnosis_form'];
+        $solutionDescription = $_POST['solution_description_form'];
+        $diagnosedBy = $_SESSION['user']['id'];
+        $diagnosisDate = $_POST['diagnosis_date_form'];
+
+        $stmt = $conexion->prepare("SELECT id FROM statuses WHERE name = 'Finalizado'");
+        $stmt->execute();
+        $statusId = $stmt->fetchColumn();
+
+        $stmt = $conexion->prepare("UPDATE repair_requests SET status_id = ? WHERE id = ?");
+        $stmt->execute([$statusId, $repairRequestId]);
+
+        $stmt = $conexion->prepare("
+            INSERT INTO diagnostics (repair_request_id, diagnosis, solution_description, diagnosed_by, diagnosis_date)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([$repairRequestId, $diagnosis, $solutionDescription, $diagnosedBy, $diagnosisDate]);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Solicitud de reparación finalizada correctamente.'
+        ]);
+
+        break;
+
+    case 'advance_repair_request_status':
+        $repairRequestId = $_POST['repair_request_id'];
+        $stmt = $conexion->prepare("SELECT status_id FROM repair_requests WHERE id = ?");
+        $stmt->execute([$repairRequestId]);
+        $currentStatusId = $stmt->fetchColumn();
+
+        $stmt = $conexion->prepare("SELECT * FROM statuses WHERE id = ?");
+        $stmt->execute([$currentStatusId]);
+        $currentStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($currentStatus['name'] == 'Enviado'){
+            $stmt = $conexion->prepare("SELECT id FROM statuses WHERE name = 'Revisión'");
+            $stmt->execute();
+            $newStatusId = $stmt->fetchColumn();
+
+            $stmt = $conexion->prepare("UPDATE repair_requests SET status_id = ? WHERE id = ?");
+            $stmt->execute([$newStatusId, $repairRequestId]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Solicitud de reparación actualizada a "Revisión".'
+            ]);
+            
+        } elseif ($currentStatus['name'] == 'Revisión') {
+            $stmt = $conexion->prepare("SELECT id FROM statuses WHERE name = 'Reparación'");
+            $stmt->execute();
+            $newStatusId = $stmt->fetchColumn();
+
+            $stmt = $conexion->prepare("UPDATE repair_requests SET status_id = ? WHERE id = ?");
+            $stmt->execute([$newStatusId, $repairRequestId]);
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Solicitud de reparación actualizada a "Reparación".'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'La solicitud de reparación no se puede avanzar desde el estado actual.'
+            ]);
+        }
+
+        break;
+
     default:
         # code...
         break;
