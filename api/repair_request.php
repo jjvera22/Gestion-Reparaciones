@@ -22,8 +22,8 @@ switch ($_POST['action']) {
                     JOIN devices d ON d.id = rr.device_id
                     JOIN statuses s ON s.id = rr.status_id
                     JOIN users u_device ON u_device.id = d.user_id
-                    JOIN diagnostics di ON rr.id = di.repair_request_id
-                    JOIN users u_diagnosed ON u_diagnosed.id = di.diagnosed_by
+                    LEFT JOIN diagnostics di ON rr.id = di.repair_request_id
+                    LEFT JOIN users u_diagnosed ON u_diagnosed.id = di.diagnosed_by
                     WHERE rr.id = ?
             ");
         $stmt->execute([$repairRequestId]);
@@ -108,6 +108,107 @@ switch ($_POST['action']) {
 
         break;
 
+    case 'get_user_devices':
+        $userId = $_POST['user_id'];
+        $stmt = $conexion->prepare("SELECT * FROM devices WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $devices
+        ]);
+        
+        break;
+
+    case 'create_repair_request':
+        $deviceId = $_POST['device_id'];
+        $problemDescription = $_POST['problem_description'];
+        $requestDate = date('Y-m-d');
+
+        $stmt = $conexion->prepare("SELECT id FROM statuses WHERE name = 'Enviado'");
+        $stmt->execute();
+        $statusId = $stmt->fetchColumn();
+
+        $stmt = $conexion->prepare("INSERT INTO repair_requests (request_date, device_id, problem_description, status_id) VALUES (?, ?, ?, ?)");
+        if ($stmt->execute([$requestDate, $deviceId, $problemDescription, $statusId])) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Solicitud de reparación creada correctamente.'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al crear la solicitud de reparación.'
+            ]);
+        }
+
+        break;
+
+    case 'get_repair_request':
+        $repairRequestId = $_POST['repair_request_id'];
+
+        $stmt = $conexion->prepare("
+            SELECT rr.id as repair_request_id, rr.request_date, rr.problem_description, d.description as device_description, d.model, d.brand, s.name as status_name, d.id as device_id
+            FROM repair_requests rr
+            JOIN devices d ON d.id = rr.device_id
+            JOIN statuses s ON s.id = rr.status_id
+            WHERE rr.id = ?
+        ");
+        $stmt->execute([$repairRequestId]);
+        $repairRequest = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($repairRequest) {
+            echo json_encode([
+                'status' => 'success',
+                'data' => $repairRequest
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Solicitud de reparación no encontrada.'
+            ]);
+        }
+
+        break;
+
+    case 'edit_repair_request':
+        $repairRequestId = $_POST['repair_request_id'];
+        $problemDescription = $_POST['problem_description'];
+        $deviceId = $_POST['device_id'];
+
+        $stmt = $conexion->prepare("UPDATE repair_requests SET problem_description = ?, device_id = ? WHERE id = ?");
+        if ($stmt->execute([$problemDescription, $deviceId, $repairRequestId])) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Solicitud de reparación actualizada correctamente.'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al actualizar la solicitud de reparación.'
+            ]);
+        }
+
+        break;
+
+    case 'delete_repair_request':
+        $repairRequestId = $_POST['repair_request_id'];
+
+        $stmt = $conexion->prepare("DELETE FROM repair_requests WHERE id = ?");
+        if ($stmt->execute([$repairRequestId])) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Solicitud de reparación eliminada correctamente.'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al eliminar la solicitud de reparación.'
+            ]);
+        }
+
+        break;
     default:
         # code...
         break;
