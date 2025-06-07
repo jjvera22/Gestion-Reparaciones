@@ -4,12 +4,24 @@
 
 <h1>Solicitudes de Reparación</h1>
 <?php
-$smtp = $conexion->prepare("
-            SELECT rr.*, d.*, s.*, d.description as device_description, u.name as user_name, rr.id as repair_request_id FROM repair_requests rr 
-            JOIN devices d ON d.id = rr.device_id
-            JOIN statuses s ON s.id = rr.status_id
-            JOIN users u ON u.id = d.user_id
-        ");
+if($_SESSION['user']['active_profile']['name'] == 'admin') {
+    $smtp = $conexion->prepare("
+        SELECT rr.*, d.*, s.*, d.description as device_description, u.name as user_name, rr.id as repair_request_id FROM repair_requests rr 
+        JOIN devices d ON d.id = rr.device_id
+        JOIN statuses s ON s.id = rr.status_id
+        JOIN users u ON u.id = d.user_id
+    ");
+} else {
+    $smtp = $conexion->prepare("
+        SELECT rr.*, d.*, s.*, d.description as device_description, u.name as user_name, rr.id as repair_request_id FROM repair_requests rr 
+        JOIN devices d ON d.id = rr.device_id
+        JOIN statuses s ON s.id = rr.status_id
+        JOIN users u ON u.id = d.user_id
+        WHERE u.id = ?
+    ");
+    $smtp->bindParam(1, $_SESSION['user']['id'], PDO::PARAM_INT);
+}
+
 $smtp->execute();
 $requests = $smtp->fetchAll(PDO::FETCH_ASSOC);
 $count = 0;
